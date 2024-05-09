@@ -27,9 +27,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
   //   console.log("email: ", email);
-  if (
-    [email, username, password].some((field) => field?.trim() === "")
-  ) {
+  if ([email, username, password].some((field) => field?.trim() === "")) {
     throw new ApiErrors(400, "All fields are required");
   }
   const existedUser = await User.findOne({
@@ -46,7 +44,6 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const profilePicture = await uploadOnCloudinary(profilePicLocalPath);
-
 
   if (!profilePicture) {
     throw new ApiErrors(400, "Profile Picture file is required");
@@ -74,9 +71,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
-  console.log(email); 
-  console.log("Login Details")
-  console.log(req.body)
+  console.log(email);
+  console.log("Login Details");
+  console.log(req.body);
   if (!username || !email) {
     throw new ApiErrors(400, "username or email is required");
   }
@@ -194,9 +191,17 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiErrors(401, error?.message || "Invalid refresh token");
   }
 });
+// GET CURRENT USER
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "User fetched successfully"));
+});
+// UP
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
+  getCurrentUser,
 };
