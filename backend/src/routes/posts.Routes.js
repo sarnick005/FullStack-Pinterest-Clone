@@ -4,6 +4,7 @@ import {
   publishAPost,
   getPostById,
   deletePost,
+  updatePost,
 } from "../controllers/post.Controllers.js";
 import { verifyJWT } from "../middleware/auth.Middleware.js";
 import { upload } from "../middleware/multer.Middleware.js";
@@ -24,7 +25,7 @@ router
     publishAPost
   );
 
-router.route("/:postId").get(getPostById).delete(deletePost);
+router.route("/:postId").get(getPostById).delete(deletePost).patch(updatePost);
 
 
 export default router;

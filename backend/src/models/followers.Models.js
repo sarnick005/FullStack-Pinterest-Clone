@@ -9,5 +9,5 @@ const followersSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-});
+},{timestamps: true});
 export const Follower = mongoose.model("Follower", followersSchema);

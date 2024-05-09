@@ -1,17 +1,22 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+const commentSchema = new Schema(
+  {
+    postId: {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    comment: {
+      type: String,
+      trim: true,
+    },
+  },
+  { timestamps: true }
+);
 
-const commentSchema = new Schema({
-  postId: {
-    type: Schema.Types.ObjectId,
-    ref: "Post",
-  },
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-  },
-  comment: {
-    type: String,
-    trim: true,
-  },
-});
+commentSchema.plugin(mongooseAggregatePaginate);
 export const Comment = mongoose.model("Comment", commentSchema);
