@@ -1,6 +1,9 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Like } from "../models/likes.Models.js";
 import { User } from "../models/user.Models.js";
+import { Post } from "../models/posts.Models.js";
+import { Notification } from "../models/notifications.Models.js";
+import { Comment } from "../models/comments.Models.js";
 import { ApiErrors } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -16,7 +19,31 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     return res.json(new ApiResponse(200, {}, "Comment like removed"));
   } else {
     const newLike = await Like.create({ commentId, userId });
-    return res.json(new ApiResponse(201, newLike, "Comment liked"));
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new ApiErrors(404, "Comment not found");
+    }
+    const userWhoLiked = await User.findById(userId, "username profilePicture");
+    if (!userWhoLiked) {
+      throw new ApiErrors(404, "User who liked the comment not found");
+    }
+    const message = `${userWhoLiked.username} liked your comment "${comment.comment}".`;
+    const notification = new Notification({
+      userId: comment.userId,
+      followerId: userId,
+      message,
+    });
+    await notification.save();
+    const responseData = {
+      userWhoLiked: {
+        userId: userWhoLiked._id,
+        username: userWhoLiked.username,
+        profilePicture: userWhoLiked.profilePicture,
+      },
+      newLike,
+    };
+
+    return res.json(new ApiResponse(201, responseData, "Comment liked"));
   }
 });
 
@@ -30,10 +57,35 @@ const togglePostLike = asyncHandler(async (req, res) => {
 
   if (existingLike) {
     await Like.findByIdAndDelete(existingLike._id);
+
     return res.json(new ApiResponse(200, {}, "Post like removed"));
   } else {
     const newLike = await Like.create({ postId, userId });
-    return res.json(new ApiResponse(201, newLike, "Post liked"));
+    const post = await Post.findById(postId);
+    if (!post) {
+      throw new ApiErrors(404, "Post not found");
+    }
+    const userWhoLiked = await User.findById(userId, "username profilePicture");
+    if (!userWhoLiked) {
+      throw new ApiErrors(404, "User who liked the post not found");
+    }
+    const message = `${userWhoLiked.username} liked your post "${post.description}".`;
+    const notification = new Notification({
+      userId: post.userId,
+      followerId: userId,
+      message,
+    });
+    await notification.save();
+    const responseData = {
+      userWhoLiked: {
+        userId: userWhoLiked._id,
+        username: userWhoLiked.username,
+        profilePicture: userWhoLiked.profilePicture,
+      },
+      newLike,
+    };
+
+    return res.json(new ApiResponse(201, responseData, "Post liked"));
   }
 });
 
@@ -100,7 +152,5 @@ const commentLikedUsers = asyncHandler(async (req, res) => {
     )
   );
 });
-
-
 
 export { toggleCommentLike, togglePostLike, postLikedUsers, commentLikedUsers };

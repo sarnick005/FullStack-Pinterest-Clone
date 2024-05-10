@@ -1,14 +1,15 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { User } from "../models/user.Models.js";
+import { Notification } from "../models/notifications.Models.js";
 import { Follower } from "../models/followers.Models.js";
 import { ApiErrors } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 // TOGGLE FOLLOWER
+
 const toggleFollower = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-
   const { followingUserId } = req.params;
 
   if (!mongoose.isValidObjectId(followingUserId)) {
@@ -25,11 +26,30 @@ const toggleFollower = asyncHandler(async (req, res) => {
     followedId: followingUserId,
   });
 
+  if (!userId || !followingUserId) {
+    throw new ApiErrors(400, "User ID or Follower ID is missing");
+  }
+
+  const followerDetails = await User.findById(userId); // Await the query
+
+  if (!followerDetails) {
+    throw new ApiErrors(404, "Follower details not found");
+  }
+
   if (follower) {
     await Follower.deleteOne({
       followerId: userId,
       followedId: followingUserId,
     });
+
+    const message = `${followerDetails.username} stopped following you.`;
+    const notification = new Notification({
+      userId: followingUserId,
+      followerId: userId,
+      message,
+    });
+    await notification.save();
+
     return res
       .status(200)
       .json(new ApiResponse("Follower relationship removed"));
@@ -38,6 +58,14 @@ const toggleFollower = asyncHandler(async (req, res) => {
       followerId: userId,
       followedId: followingUserId,
     });
+    const message = `${followerDetails.username} started following you.`;
+    const notification = new Notification({
+      userId: followingUserId,
+      followerId: userId,
+      message,
+    });
+    await notification.save();
+
     return res
       .status(201)
       .json(new ApiResponse("Follower relationship created"));

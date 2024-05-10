@@ -1,25 +1,32 @@
-import { Notification } from "../models/notificationSchema.js";
-import { User } from "../models/userSchema.js";
+import { Notification } from "../models/notifications.Models.js";
+import { User } from "../models/user.Models.js";
 import { ApiErrors } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const sendFollowNotification = asyncHandler(async (req, res) => {
-  const { userId, followerId } = req.body;
-  if (!userId || !followerId) {
-    throw new ApiErrors(400, "User ID or Follower ID is missing");
+// GET FOLLOW NOTIFICATIONS
+
+const getFollowNotification = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) {
+    throw new ApiErrors(400, "User ID is missing");
   }
-  const message = `${followerId} started following you.`;
-  const notification = new Notification({
+  const notifications = await Notification.find({
     userId,
-    followerId,
-    message,
   });
-  await notification.save();
+  const userDetails = await User.findById(userId, "username profilePicture");
+  const response = {
+    followerDetails: {
+      userId: userDetails._id,
+      username: userDetails.username,
+      profilePicture: userDetails.profilePicture,
+    },
+    notifications: notifications,
+  };
 
   return res.json(
-    new ApiResponse(200, notification, "Notification sent successfully")
+    new ApiResponse(200, response, "Notifications sent successfully")
   );
 });
 
-export { sendFollowNotification };
+export { getFollowNotification };
