@@ -31,7 +31,7 @@ const publishAPost = asyncHandler(async (req, res) => {
   }
   const contentLocalPath = req.files?.content[0]?.path;
   if (!contentLocalPath) {
-    throw new ApiErrors(400, "Avatar file is required");
+    throw new ApiErrors(400, "Content file is required");
   }
 
   const contentURL = await uploadOnCloudinary(contentLocalPath);

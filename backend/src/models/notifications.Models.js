@@ -10,10 +10,19 @@ const notificationSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    commentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+    },
     postId: {
       type: Schema.Types.ObjectId,
       ref: "Post",
     },
+    followerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     message: {
       type: String,
       required: true,

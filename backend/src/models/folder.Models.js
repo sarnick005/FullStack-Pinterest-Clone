@@ -11,6 +11,9 @@ const savedSchema = new Schema(
       required: true,
       trim: true,
     },
+    folderDescription: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
