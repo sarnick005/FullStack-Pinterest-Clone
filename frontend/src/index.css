@@ -35,3 +35,7 @@
   color: #000;
   font-weight: 700;
 }
+
+.unactiveButton:hover {
+  background-color: #e1e1e1;
+}

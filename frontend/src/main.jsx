@@ -10,11 +10,15 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
+import Explore from "./components/Explore/Explore.jsx";
+import Create from "./components/Create/Create.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route path="" element={<Home />} />
+      <Route path="explore" element={<Explore />} />
+      <Route path="create" element={<Create />} />
     </Route>,
   ),
 );
